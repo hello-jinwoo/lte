@@ -3,3 +3,5 @@ from . import edsr, rdn, rcan, swinir
 from . import mlp
 
 from . import misc, liif, lte, ltep
+
+from . import edsr_multi
