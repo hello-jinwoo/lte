@@ -14,7 +14,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 import datasets
 import models
 import utils
-from test import eval_psnr
+from test_jw import eval_psnr
 
 import torch.nn.functional as F
 

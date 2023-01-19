@@ -8,9 +8,9 @@ train_dataset:
   wrapper:
     name: sr-simple
     args:
-      gt_size: 192
+      gt_size: 96
       augment: true
-  batch_size: 16
+  batch_size: 8
 
 data_norm:
   inp: {sub: [0.5], div: [0.5]}
@@ -19,7 +19,7 @@ data_norm:
 model:
   name: edsr-baseline-multi
   args:
-    no_upsampling: true
+    no_upsampling: false
   #   scale: 4
 
 optimizer:
