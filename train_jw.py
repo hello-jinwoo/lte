@@ -193,11 +193,13 @@ def main(config_, save_path):
             #     eval_type=config.get('eval_type'),
             #     eval_bsize=config.get('eval_bsize'))
             scale_factors = [2, 2.5, 3, 3.5, 4, 8, 30]
-            val_res_set5 = eval_psnr(model, 'Set5', save_dir=save_path, scale_factor=scale_factors)
-            val_res_set14 = eval_psnr(model, 'Set14', save_dir=save_path, scale_factor=scale_factors)
+            for sf in scale_factors:
+                val_res_set5 = eval_psnr(model, 'Set5', save_dir=save_path, scale_factor=sf)
+                val_res_set14 = eval_psnr(model, 'Set14', save_dir=save_path, scale_factor=sf)
+                log_info.append('SF{}:{:.4f}/{:.4f}'.format(sf,val_res_set5, val_res_set14))
 
-            log_info.append('val_set5: psnr={:.4f}'.format(val_res_set5))
-            log_info.append('val_set14: psnr={:.4f}'.format(val_res_set14))
+            # log_info.append('val_set5: psnr={:.4f}'.format(val_res_set5))
+            # log_info.append('val_set14: psnr={:.4f}'.format(val_res_set14))
 #             writer.add_scalars('psnr', {'val': val_res}, epoch)
             if val_res5 > max_val_v_set5:
                 max_val_v_set5 = val_res_set5
