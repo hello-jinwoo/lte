@@ -6,11 +6,122 @@ import shutil
 import math
 
 import torch
+import torch.nn.functional as F
+
 import numpy as np
 from torch.optim import SGD, Adam
 from tensorboardX import SummaryWriter
+import imageio
+from PIL import Image
+
+def tensor2numpy(tensor, rgb_range=1.):
+    rgb_coefficient = 255 / rgb_range
+    img = tensor.mul(rgb_coefficient).clamp(0, 255).round()
+    img = img[0].data
+    img = np.transpose(img.cpu().numpy(), (1, 2, 0)).astype(np.uint8)
+    return img
+
+def numpy2tensor(img, rgb_range=1.):
+    
+    img = np.array(img).astype('float64')
+    np_transpose = np.ascontiguousarray(img.transpose((2, 0, 1)))  # HWC -> CHW
+    tensor = torch.from_numpy(np_transpose).float()  # numpy -> tensor
+    tensor.mul_(rgb_range / 255)  # (0,255) -> (0,1)
+    tensor = tensor.unsqueeze(0)
+
+    return tensor
+
+def pad_img(x, size_must_mode=8):
+
+    b,c,h,w = x.size()
+    pw = (( w//(size_must_mode)+1)*size_must_mode -w)
+    ph = (( h//(size_must_mode)+1)*size_must_mode -h)
+
+    if pw == 0 :
+        pl, pr = 0, 0
+    else:
+        pl = pw//2
+        pr = pw - pl
+
+    if pw == 0 :
+        pu, pd = 0, 0
+    else:
+        pu = ph//2
+        pd = ph - pu
+
+    pad = [pl, pr, pu, pd]
+    # print(h,w, pad)
+    x = F.pad(x, pad=pad, mode='replicate')
+
+    return x, pad
+
+def save_img(img, path, denorm=False):
+    B, C,H,W = img.size()
+    if denorm:
+        img = (img+1)/2.
+    if C is not 3:
+        img = img.repeat(1,3,1,1)
+    img = img[0]
+    img = img.permute(1,2,0)
+    img = img.cpu().data.numpy()
+    img = (np.clip(img, 0,1)*255).astype(np.uint8)
+    Image.fromarray(img).save(path)
+
+def save_img_np(img, path):
+    img = img.astype(np.uint8)
+    Image.fromarray(img).save(path)
 
 
+def psnr_measure(src ,tar, shave_border=0):
+
+    def psnr(y_true,y_pred, shave_border=4):
+        '''
+            Input must be 0-255, 2D
+        '''
+
+        target_data = np.array(y_true, dtype=np.float32)
+        ref_data = np.array(y_pred, dtype=np.float32)
+
+        diff = ref_data - target_data
+        if shave_border > 0:
+            diff = diff[shave_border:-shave_border, shave_border:-shave_border]
+        rmse = np.sqrt(np.mean(np.power(diff, 2)))
+
+        # print('rmse', rmse)
+        # if rmse < 1:
+        #     return 50
+        # else:
+        return 20 * np.log10(255./rmse)
+
+    def rgb2ycbcr(img, maxVal=255):
+        O = np.array([[16],
+                    [128],
+                    [128]])
+        T = np.array([[0.256788235294118, 0.504129411764706, 0.097905882352941],
+                    [-0.148223529411765, -0.290992156862745, 0.439215686274510],
+                    [0.439215686274510, -0.367788235294118, -0.071427450980392]])
+
+        if maxVal == 1:
+            O = O / 255.0
+
+        img_s = img.shape
+        if len(img_s) >= 3:
+            t = np.reshape(img, (img.shape[0]*img.shape[1], img.shape[2]))
+        else:
+            t = img
+        t = np.dot(t, np.transpose(T))
+        t[:, 0] += O[0]
+        t[:, 1] += O[1]
+        t[:, 2] += O[2]
+        if len(img_s) >= 3:
+            ycbcr = np.reshape(t, [img.shape[0], img.shape[1], img.shape[2]])
+        else:
+            ycbcr = t
+
+        return ycbcr
+
+    return psnr(rgb2ycbcr((src).astype(np.uint8))[:,:,0], rgb2ycbcr((tar).astype(np.uint8))[:,:,0], shave_border=shave_border)
+    
 class Averager():
 
     def __init__(self):
