@@ -18,8 +18,8 @@ data_norm:
 
 model:
   name: edsr-baseline-multi
-  args:
-    scale: 4
+  # args:
+  #   scale: 4
 
 optimizer:
   name: adam
