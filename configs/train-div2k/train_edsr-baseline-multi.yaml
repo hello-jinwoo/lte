@@ -19,7 +19,7 @@ data_norm:
 model:
   name: edsr-baseline-multi
   args:
-    no_upscaling: true
+    no_upsampling: true
   #   scale: 4
 
 optimizer:
