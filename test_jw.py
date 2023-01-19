@@ -60,8 +60,9 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         blurred_tensor = F.interpolate(input_tensor, scale_factor=1/scale_factor, mode='bicubic')
 
         with torch.no_grad():
-            output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
-            output = output.view(1,new_h,new_w,3).permute(0,3,1,2)
+            # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
+            # output = output.view(1,new_h,new_w,3).permute(0,3,1,2)
+            output = model(input_tensor, target_size=(new_h, new_w))
             output = output * 0.5 + 0.5
 
         output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
