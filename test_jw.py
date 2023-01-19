@@ -3,6 +3,7 @@ import os
 import math
 from functools import partial
 import glob
+import imageio.v2 as imageio
 
 import yaml
 import torch

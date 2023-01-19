@@ -4,6 +4,7 @@ import argparse
 import os
 import random
 import glob
+import imageio.v2 as imageio
 
 import yaml
 import torch
