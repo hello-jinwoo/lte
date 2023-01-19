@@ -18,7 +18,6 @@ class SRSimple(Dataset):
     def __init__(self, dataset, gt_size=None, augment=False):
         self.dataset = dataset
         self.gt_size = gt_size
-        self.scale_min = scale_min
         self.augment = augment
 
     def __len__(self):
