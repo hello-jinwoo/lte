@@ -52,9 +52,9 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         h, w, c = gt.shape
         # new_h, new_w = h - h % self.args.size_must_mode, w - w % self.args.size_must_mode
         # gt = gt[:new_h, :new_w, :]
-        gt_tensor = utils.numpy2tensor(gt).cuda()
-        gt_tensor, pad = utils.pad_img(gt_tensor, 24*scale_factor)#self.args.size_must_mode*self.args.scale)
-        _,_, new_h, new_w = gt_tensor.size()
+        # gt_tensor = utils.numpy2tensor(gt).cuda()
+        # gt_tensor, pad = utils.pad_img(gt_tensor, 24*scale_factor)#self.args.size_must_mode*self.args.scale)
+        # _,_, new_h, new_w = gt_tensor.size()
         # input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
         # blurred_tensor = core.imresize(input_tensor, scale=scale_factor)
         input_tensor = F.interpolate(gt_tensor, scale_factor=1/scale_factor, mode='bicubic')
@@ -63,17 +63,21 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         with torch.no_grad():
             # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
             # output = output.view(1,new_h,new_w,3).permute(0,3,1,2)
-            output = model(input_tensor, target_size=(new_h, new_w))
+            output = model(input_tensor, target_size=(h, w))
             output = output * 0.5 + 0.5
 
-        output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
-        input_img = utils.tensor2numpy(blurred_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
-        gt_img = utils.tensor2numpy(gt_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        # output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        # input_img = utils.tensor2numpy(blurred_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        # gt_img = utils.tensor2numpy(gt_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        
+        output_img = utils.tensor2numpy(output)            
+        gt_img = utils.tensor2numpy(gt_tensor)            
+        
         psnr = utils.psnr_measure(output_img, gt_img)
 
-        canvas = np.concatenate((input_img,output_img, gt_img), 1)
+        # canvas = np.concatenate((input_img,output_img, gt_img), 1)
         
-        utils.save_img_np(canvas, '{}/{}.png'.format(save_path, filename))
+        # utils.save_img_np(canvas, '{}/{}.png'.format(save_path, filename))
 
         total_psnrs.append(psnr)
 
