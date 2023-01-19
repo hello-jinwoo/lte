@@ -14,6 +14,7 @@ from tqdm import tqdm
 import datasets
 import models
 import utils
+import numpy as np
 
 
 def batched_predict(model, inp, coord, cell, bsize):
