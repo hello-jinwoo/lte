@@ -101,10 +101,10 @@ class EDSR_Multi(nn.Module):
         # scale = args.scale[0]
         act = nn.ReLU(True)
         # url_name = 'r{}f{}x{}'.format(n_resblocks, n_feats, scale)
-        if url_name in url:
-            self.url = url[url_name]
-        else:
-            self.url = None
+        # if url_name in url:
+            # self.url = url[url_name]
+        # else:
+            # self.url = None
         self.sub_mean = MeanShift(args.rgb_range)
         self.add_mean = MeanShift(args.rgb_range, sign=1)
 
