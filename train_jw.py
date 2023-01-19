@@ -201,10 +201,10 @@ def main(config_, save_path):
             # log_info.append('val_set5: psnr={:.4f}'.format(val_res_set5))
             # log_info.append('val_set14: psnr={:.4f}'.format(val_res_set14))
 #             writer.add_scalars('psnr', {'val': val_res}, epoch)
-            if val_res5 > max_val_v_set5:
+            if val_res_set5 > max_val_v_set5:
                 max_val_v_set5 = val_res_set5
                 torch.save(sv_file, os.path.join(save_path, 'epoch-best-set5.pth'))
-            if val_res14 > max_val_v_set14:
+            if val_res_set14 > max_val_v_set14:
                 max_val_v_set14 = val_res_set14
                 torch.save(sv_file, os.path.join(save_path, 'epoch-best-set14.pth'))
 
