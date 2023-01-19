@@ -96,7 +96,7 @@ def train(train_loader, model, optimizer, \
         _, _, target_h, target_w = gt.shape
 
         scale_factor = random.uniform(1, 4)
-        inp = F.interpolate(gt, size=(int(target_h*scale_factor), int(target_w*scale_factor)), mode='bicubic')
+        inp = F.interpolate(gt, size=(int(target_h/scale_factor), int(target_w/scale_factor)), mode='bicubic')
 
         pred = model(inp, target_size=(target_h, target_w))
 
