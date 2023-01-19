@@ -52,7 +52,7 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         h, w, c = gt.shape
         # new_h, new_w = h - h % self.args.size_must_mode, w - w % self.args.size_must_mode
         # gt = gt[:new_h, :new_w, :]
-        # gt_tensor = utils.numpy2tensor(gt).cuda()
+        gt_tensor = utils.numpy2tensor(gt).cuda()
         # gt_tensor, pad = utils.pad_img(gt_tensor, 24*scale_factor)#self.args.size_must_mode*self.args.scale)
         # _,_, new_h, new_w = gt_tensor.size()
         # input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
