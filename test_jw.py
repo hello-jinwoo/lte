@@ -58,7 +58,7 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         # input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
         # blurred_tensor = core.imresize(input_tensor, scale=scale_factor)
         input_tensor = F.interpolate(gt_tensor, scale_factor=1/scale_factor, mode='bicubic')
-        blurred_tensor = F.interpolate(input_tensor, scale_factor=1/scale_factor, mode='bicubic')
+        blurred_tensor = F.interpolate(input_tensor, scale_factor=scale_factor, mode='bicubic')
 
         with torch.no_grad():
             # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
