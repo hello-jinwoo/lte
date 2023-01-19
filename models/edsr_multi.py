@@ -133,7 +133,7 @@ class EDSR_Multi(nn.Module):
             ]
             self.tail = nn.Sequential(*m_tail)
 
-    def forward(self, x):
+    def forward(self, x, target_size):
         #x = self.sub_mean(x)
         x = self.head(x)
 
@@ -143,9 +143,7 @@ class EDSR_Multi(nn.Module):
         if self.args.no_upsampling:
             x = res
         else:
-            x_size = x.shape[2:]
-            target_size = [x_size[0], x_size[1]]
-            x = torchvision.transforms.functional.resize(x, target_size, Image.BICUBIC)
+            x = F.interpolate(x, size=target_size, mode='bicubic')
             x = self.tail(res)
         #x = self.add_mean(x)
         return x
@@ -172,13 +170,12 @@ class EDSR_Multi(nn.Module):
 
 @register('edsr-baseline-multi')
 def make_edsr_baseline_multi(n_resblocks=16, n_feats=64, res_scale=1,
-                       scale=2, no_upsampling=False, rgb_range=1):
+                             no_upsampling=False, rgb_range=1):
     args = Namespace()
     args.n_resblocks = n_resblocks
     args.n_feats = n_feats
     args.res_scale = res_scale
 
-    args.scale = [scale]
     args.no_upsampling = no_upsampling
 
     args.rgb_range = rgb_range
@@ -188,13 +185,12 @@ def make_edsr_baseline_multi(n_resblocks=16, n_feats=64, res_scale=1,
 
 @register('edsr-multi')
 def make_edsr_multi(n_resblocks=32, n_feats=256, res_scale=0.1,
-              scale=2, no_upsampling=False, rgb_range=1):
+                    no_upsampling=False, rgb_range=1):
     args = Namespace()
     args.n_resblocks = n_resblocks
     args.n_feats = n_feats
     args.res_scale = res_scale
 
-    args.scale = [scale]
     args.no_upsampling = no_upsampling
 
     args.rgb_range = rgb_range

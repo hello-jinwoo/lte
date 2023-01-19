@@ -37,8 +37,6 @@ model:
   args:
     encoder_spec:
       name: edsr-baseline-multi
-      args:
-        scale: 2
 
 optimizer:
   name: adam

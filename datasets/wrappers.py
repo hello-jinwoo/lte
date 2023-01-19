@@ -12,6 +12,51 @@ from datasets import register
 from utils import to_pixel_samples
 from utils import make_coord
 
+@register('sr-simple')
+class SRSimple(Dataset):
+
+    def __init__(self, dataset, gt_size=None, augment=False):
+        self.dataset = dataset
+        self.gt_size = gt_size
+        self.scale_min = scale_min
+        self.augment = augment
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        img = self.dataset[idx]
+
+        # w_lr = self.gt_size
+        w_hr = self.gt_size
+        x0 = random.randint(0, img.shape[-2] - self.gt_size)
+        y0 = random.randint(0, img.shape[-1] - self.gt_size)
+        crop_hr = img[:, x0: x0 + w_hr, y0: y0 + w_hr]
+        
+
+        if self.augment:
+            hflip = random.random() < 0.5
+            vflip = random.random() < 0.5
+            dflip = random.random() < 0.5
+
+            def augment(x):
+                if hflip:
+                    x = x.flip(-2)
+                if vflip:
+                    x = x.flip(-1)
+                if dflip:
+                    x = x.transpose(-2, -1)
+                return x
+
+           
+            crop_hr = augment(crop_hr)
+
+      
+        return {
+            'gt_img': crop_hr,
+        }
+
+
 @register('sr-implicit-paired')
 class SRImplicitPaired(Dataset):
 
