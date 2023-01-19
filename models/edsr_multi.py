@@ -143,7 +143,7 @@ class EDSR_Multi(nn.Module):
         if self.args.no_upsampling:
             x = res
         else:
-            x = F.interpolate(x, size=target_size, mode='bicubic')
+            res = F.interpolate(res, size=target_size, mode='bicubic')
             x = self.tail(res)
         #x = self.add_mean(x)
         return x

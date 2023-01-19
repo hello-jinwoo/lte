@@ -142,7 +142,8 @@ def main(config_, save_path):
     epoch_max = config['epoch_max']
     epoch_val = config.get('epoch_val')
     epoch_save = config.get('epoch_save')
-    max_val_v = -1e18
+    max_val_v_set5 = -1e18
+    max_val_v_set14 = -1e18
 
     timer = utils.Timer()
 
@@ -185,16 +186,23 @@ def main(config_, save_path):
                 model_ = model.module
             else:
                 model_ = model
-            val_res = eval_psnr(val_loader, model_,
-                data_norm=config['data_norm'],
-                eval_type=config.get('eval_type'),
-                eval_bsize=config.get('eval_bsize'))
+            # val_res = eval_psnr(val_loader, model_,
+            #     data_norm=config['data_norm'],
+            #     eval_type=config.get('eval_type'),
+            #     eval_bsize=config.get('eval_bsize'))
+            scale_factors = [2, 2.5, 3, 3.5, 4, 8, 30]
+            val_res_set5 = eval_psnr(model, 'Set5', save_path=save_path, scale_factor=scale_factors)
+            val_res_set14 = eval_psnr(model, 'Set14', save_path=save_path, scale_factor=scale_factors)
 
-            log_info.append('val: psnr={:.4f}'.format(val_res))
+            log_info.append('val_set5: psnr={:.4f}'.format(val_res_set5))
+            log_info.append('val_set14: psnr={:.4f}'.format(val_res_set14))
 #             writer.add_scalars('psnr', {'val': val_res}, epoch)
-            if val_res > max_val_v:
-                max_val_v = val_res
-                torch.save(sv_file, os.path.join(save_path, 'epoch-best.pth'))
+            if val_res5 > max_val_v_set5:
+                max_val_v_set5 = val_res_set5
+                torch.save(sv_file, os.path.join(save_path, 'epoch-best-set5.pth'))
+            if val_res14 > max_val_v_set14:
+                max_val_v_set14 = val_res_set14
+                torch.save(sv_file, os.path.join(save_path, 'epoch-best-set14.pth'))
 
         t = timer.t()
         prog = (epoch - epoch_start + 1) / (epoch_max - epoch_start + 1)

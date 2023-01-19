@@ -119,6 +119,55 @@ def eval_psnr(loader, model, data_norm=None, eval_type=None, eval_bsize=None, wi
             
     return val_res.item()
 
+def eval_psnr(model, data_name, save_dir, scale_factor=4):
+    model.eval()
+    test_path = f'./datasets/{data_name}/HR'
+
+    gt_images = sorted(glob.glob(test_path + '/*.png'))
+
+    save_path = os.path.join(save_dir,  data_name)
+    os.makedirs(save_path, exist_ok=True)
+    total_psnrs = []
+
+    for gt_path in gt_images:
+        # print(gt_path)
+        filename = os.path.basename(gt_path).split('.')[0] 
+        gt = imageio.imread(gt_path)
+        
+        if gt.ndim == 2:
+            gt = np.expand_dims(gt, axis=2)
+            gt = np.repeat(gt, 3, axis=2)
+        h, w, c = gt.shape
+        # new_h, new_w = h - h % self.args.size_must_mode, w - w % self.args.size_must_mode
+        # gt = gt[:new_h, :new_w, :]
+        gt_tensor = utils.numpy2tensor(gt).cuda()
+        gt_tensor, pad = utils.pad_img(gt_tensor, 24*scale_factor)#self.args.size_must_mode*self.args.scale)
+        _,_, new_h, new_w = gt_tensor.size()
+        input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
+        blurred_tensor = core.imresize(input_tensor, scale=scale_factor)
+
+        with torch.no_grad():
+            output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
+            output = output.view(1,new_h,new_w,3).permute(0,3,1,2)
+            output = output * 0.5 + 0.5
+
+        output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        input_img = utils.tensor2numpy(blurred_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        gt_img = utils.tensor2numpy(gt_tensor[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
+        psnr = utils.psnr_measure(output_img, gt_img)
+
+        canvas = np.concatenate((input_img,output_img, gt_img), 1)
+        
+        utils.save_img_np(canvas, '{}/{}.png'.format(save_path, filename))
+
+        total_psnrs.append(psnr)
+
+        
+    total_psnrs = np.mean(np.array(total_psnrs))
+    
+
+    return  total_psnrs
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
