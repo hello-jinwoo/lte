@@ -8,6 +8,7 @@ import imageio.v2 as imageio
 import yaml
 import torch
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 from tqdm import tqdm
 
 import datasets
@@ -53,8 +54,10 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         gt_tensor = utils.numpy2tensor(gt).cuda()
         gt_tensor, pad = utils.pad_img(gt_tensor, 24*scale_factor)#self.args.size_must_mode*self.args.scale)
         _,_, new_h, new_w = gt_tensor.size()
-        input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
-        blurred_tensor = core.imresize(input_tensor, scale=scale_factor)
+        # input_tensor = core.imresize(gt_tensor, scale=1/scale_factor)
+        # blurred_tensor = core.imresize(input_tensor, scale=scale_factor)
+        input_tensor = F.interpolate(gt_tensor, scale_factor=1/scale_factor, mode='bicubic')
+        blurred_tensor = F.interpolate(input_tensor, scale_factor=1/scale_factor, mode='bicubic')
 
         with torch.no_grad():
             output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
