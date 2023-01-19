@@ -91,15 +91,14 @@ def train(train_loader, model, optimizer, \
         for k, v in batch.items():
             batch[k] = v.cuda()
 
-        inp = (batch['inp'] - inp_sub) / inp_div
-        _, _, inp_h, inp_w = inp.shape
+        gt = (batch['gt'] - gt_sub) / gt_div
+        _, _, target_h, target_w = gt.shape
 
         scale_factor = random.uniform(1, 4)
-        inp = F.interpolate(inp, size=(inp_h*scale_factor, w*scale_factor), mode='bicubic')
+        inp = F.interpolate(gt, size=(target_h*scale_factor, target_w*scale_factor), mode='bicubic')
 
-        pred = model(inp, target_size=(inp_h, inp_w))
+        pred = model(inp, target_size=(target_h, target_w))
 
-        gt = (batch['gt'] - gt_sub) / gt_div
         loss = loss_fn(pred, gt)
         psnr = metric_fn(pred, gt)
         
