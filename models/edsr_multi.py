@@ -98,9 +98,9 @@ class EDSR_Multi(nn.Module):
         n_resblocks = args.n_resblocks
         n_feats = args.n_feats
         kernel_size = 3
-        scale = args.scale[0]
+        # scale = args.scale[0]
         act = nn.ReLU(True)
-        url_name = 'r{}f{}x{}'.format(n_resblocks, n_feats, scale)
+        # url_name = 'r{}f{}x{}'.format(n_resblocks, n_feats, scale)
         if url_name in url:
             self.url = url[url_name]
         else:
