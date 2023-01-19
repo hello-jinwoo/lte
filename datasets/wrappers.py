@@ -52,7 +52,7 @@ class SRSimple(Dataset):
 
       
         return {
-            'gt_img': crop_hr,
+            'gt': crop_hr,
         }
 
 
