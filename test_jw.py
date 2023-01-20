@@ -77,7 +77,7 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         with torch.no_grad():
             # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), target_size=(h,w), bsize=30000)
             # output = output.view(1,h,w,3).permute(0,3,1,2)
-            output = model(((input_tensor - 0.5) / 0.5), target_size=(h, w))
+            output = model(x=(input_tensor - 0.5) / 0.5, target_size=(h, w))
             output = output * 0.5 + 0.5
 
         # output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
