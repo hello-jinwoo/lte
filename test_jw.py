@@ -17,7 +17,21 @@ import utils
 import numpy as np
 
 
-def batched_predict(model, inp, coord, cell, bsize):
+def batched_predict_im(model, inp, coord, cell, bsize):
+    with torch.no_grad():
+        model.gen_feat(inp)
+        n = coord.shape[1]
+        ql = 0
+        preds = []
+        while ql < n:
+            qr = min(ql + bsize, n)
+            pred = model.query_rgb(coord[:, ql: qr, :], cell[:, ql: qr, :])
+            preds.append(pred)
+            ql = qr
+        pred = torch.cat(preds, dim=1)
+    return pred
+
+def batched_predict(model, inp, target_size, bsize):
     with torch.no_grad():
         model.gen_feat(inp)
         n = coord.shape[1]
@@ -61,9 +75,9 @@ def eval_psnr(model, data_name, save_dir, scale_factor=4):
         blurred_tensor = F.interpolate(input_tensor, scale_factor=scale_factor, mode='bicubic')
 
         with torch.no_grad():
-            # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), scale_factor, bsize=30000)
-            # output = output.view(1,new_h,new_w,3).permute(0,3,1,2)
-            output = model(input_tensor, target_size=(h, w))
+            # output = batched_predict(model, ((input_tensor - 0.5) / 0.5), target_size=(h,w), bsize=30000)
+            # output = output.view(1,h,w,3).permute(0,3,1,2)
+            output = model((input_tensor - 0.5) / 0.5, target_size=(h, w))
             output = output * 0.5 + 0.5
 
         # output_img = utils.tensor2numpy(output[0:1,:, pad[2]:new_h-pad[3], pad[0]:new_w-pad[1]])            
