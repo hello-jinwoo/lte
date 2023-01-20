@@ -143,13 +143,13 @@ class EDSR_Multi(nn.Module):
         if self.args.no_upsampling:
             x = res
         else:
-            if type(args.upsample_mode) == str:
-                res = F.interpolate(res, size=target_size, mode=args.upsample_mode)
-            elif type(args.upsample_mode) == list:
-                tmp_res = F.interpolate(res, size=target_size, mode=args.upsample_mode[0])
-                for m in args.upsample_mode[1:]:
+            if type(self.args.upsample_mode) == str:
+                res = F.interpolate(res, size=target_size, mode=self.args.upsample_mode)
+            elif type(self.args.upsample_mode) == list:
+                tmp_res = F.interpolate(res, size=target_size, mode=self.args.upsample_mode[0])
+                for m in self.args.upsample_mode[1:]:
                     tmp_res = tmp_res + F.interpolate(res, size=target_size, mode=m)
-                tmp_res = tmp_res / len(args.upsample_mode)
+                tmp_res = tmp_res / len(self.args.upsample_mode)
             else:
                 res = F.interpolate(res, size=target_size, mode='bicubic')
             x = self.tail(res)
@@ -185,6 +185,7 @@ def make_edsr_baseline_multi(n_resblocks=16, n_feats=64, res_scale=1,
     args.res_scale = res_scale
 
     args.no_upsampling = no_upsampling
+    args.upsample_mode = upsample_mode
 
     args.rgb_range = rgb_range
     args.n_colors = 3
@@ -200,6 +201,7 @@ def make_edsr_multi(n_resblocks=32, n_feats=256, res_scale=0.1,
     args.res_scale = res_scale
 
     args.no_upsampling = no_upsampling
+    args.upsample_mode = upsample_mode
 
     args.rgb_range = rgb_range
     args.n_colors = 3
