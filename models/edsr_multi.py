@@ -143,8 +143,13 @@ class EDSR_Multi(nn.Module):
         if self.args.no_upsampling:
             x = res
         else:
-            if args.upsample_mode:
+            if type(args.upsample_mode) == str:
                 res = F.interpolate(res, size=target_size, mode=args.upsample_mode)
+            elif type(args.upsample_mode) == list:
+                tmp_res = F.interpolate(res, size=target_size, mode=args.upsample_mode[0])
+                for m in args.upsample_mode[1:]:
+                    tmp_res = tmp_res + F.interpolate(res, size=target_size, mode=m)
+                tmp_res = tmp_res / len(args.upsample_mode)
             else:
                 res = F.interpolate(res, size=target_size, mode='bicubic')
             x = self.tail(res)
@@ -173,7 +178,7 @@ class EDSR_Multi(nn.Module):
 
 @register('edsr-baseline-multi')
 def make_edsr_baseline_multi(n_resblocks=16, n_feats=64, res_scale=1,
-                             no_upsampling=False, rgb_range=1):
+                             no_upsampling=False, upsample_mode='bicubic', rgb_range=1):
     args = Namespace()
     args.n_resblocks = n_resblocks
     args.n_feats = n_feats
@@ -188,7 +193,7 @@ def make_edsr_baseline_multi(n_resblocks=16, n_feats=64, res_scale=1,
 
 @register('edsr-multi')
 def make_edsr_multi(n_resblocks=32, n_feats=256, res_scale=0.1,
-                    no_upsampling=False, rgb_range=1):
+                    no_upsampling=False, upsample_mode='bicubic', rgb_range=1):
     args = Namespace()
     args.n_resblocks = n_resblocks
     args.n_feats = n_feats
