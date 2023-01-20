@@ -150,6 +150,7 @@ class EDSR_Multi(nn.Module):
                 for m in self.args.upsample_mode[1:]:
                     tmp_res = tmp_res + F.interpolate(res, size=target_size, mode=m)
                 tmp_res = tmp_res / len(self.args.upsample_mode)
+                res = tmp_res
             else:
                 res = F.interpolate(res, size=target_size, mode='bicubic')
             x = self.tail(res)
