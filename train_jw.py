@@ -71,8 +71,7 @@ def prepare_training():
     return model, optimizer, epoch_start, lr_scheduler
 
 
-def train(train_loader, model, optimizer, \
-         epoch):
+def train(config, train_loader, model, optimizer, epoch):
     model.train()
     loss_fn = nn.L1Loss()
     train_loss = utils.Averager()
@@ -97,7 +96,14 @@ def train(train_loader, model, optimizer, \
         gt = (batch['gt'] - gt_sub) / gt_div
         _, _, target_h, target_w = gt.shape
 
-        scale_factor = random.uniform(1, 4)
+        if config['scale']['mode'] == 'fixed':
+            scale_factor = config['scale']['factor']
+        elif config['scale']['mode'] == 'multi_fixed':
+            scale_factor = random.choice(scale_factor = config['scale']['factor_list'])
+        elif config['scale']['mode'] == 'multi_arbitrary':
+            scale_factor = random.uniform(config['scale']['factor_range'][0], config['scale']['factor_range'][1])
+        else:
+            scale_factor = random.uniform(1, 4)
         inp = F.interpolate(gt, size=(int(target_h/scale_factor), int(target_w/scale_factor)), mode='bicubic')
 
         pred = model(inp, target_size=(target_h, target_w))
@@ -155,8 +161,7 @@ def main(config_, save_path):
 
         writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch)
 
-        train_loss = train(train_loader, model, optimizer, \
-                           epoch)
+        train_loss = train(config, train_loader, model, optimizer, epoch)
         if lr_scheduler is not None:
             lr_scheduler.step()
 
