@@ -20,7 +20,7 @@ model:
   name: edsr-baseline-multi
   args:
     no_upsampling: false
-    upsample_mode: 'bilinear'
+    upsample_mode: 'nearest'
   #   scale: 4
 
 optimizer:
